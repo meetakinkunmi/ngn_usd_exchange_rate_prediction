@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from exchange_rate_forecast.pipeline import predict_next_exchange_rate
+from exchange_rate_model.pipeline import predict_next_exchange_rate
 
 st.set_page_config(page_title="₦/$ Exchange Rate Predictor", layout="centered")
 
