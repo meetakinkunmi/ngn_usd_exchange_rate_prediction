@@ -1,6 +1,6 @@
 import joblib
 import pandas as pd
-from .model import ensemble_lasso_linear_lstm
+from exchange_rate_model.module import ensemble_lasso_linear_lstm
 
 # Load saved models or retrain dynamically if needed
 def predict_next_exchange_rate(new_data: pd.DataFrame) -> float:
