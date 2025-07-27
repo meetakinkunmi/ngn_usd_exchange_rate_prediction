@@ -1,20 +1,37 @@
 import streamlit as st
-import pandas as pd
-from exchange_rate_model.pipeline import predict_next_exchange_rate
+import matplotlib.pyplot as plt
+from exchange_rate_model.pipeline import full_pipeline
 
-st.set_page_config(page_title="₦/$ Exchange Rate Predictor", layout="centered")
+# Page config
+st.set_page_config(page_title="USD/NGN Forecast", layout="centered")
 
-st.title("📈 Naira to Dollar Exchange Rate Forecast")
-st.markdown("Use this app to forecast the next ₦/$ rate based on recent historical data.")
+st.title("📈 Exchange Rate Forecast Dashboard")
+st.markdown("---")
 
-uploaded_file = st.file_uploader("Upload a single-row CSV of lagged & logged data", type=["csv"])
+# Sidebar for user input
+st.sidebar.header("🔧 Configuration")
+db_path = st.sidebar.text_input("Database Path", "data/exchange_rate_data.db")
+table_name = st.sidebar.text_input("Table Name", "ngn_usd_data")
+lags = st.sidebar.slider("Lag Features", min_value=1, max_value=10, value=4)
+n_splits = st.sidebar.slider("TimeSeriesSplit (n_splits)", min_value=2, max_value=10, value=2)
 
-if uploaded_file is not None:
-    input_df = pd.read_csv(uploaded_file, index_col=0)
+if st.sidebar.button("Run Forecast"):
+    with st.spinner("Running full pipeline..."):
+        fig, metrics_df, y_next, last_df = full_pipeline(db_path, table_name, lags, n_splits)
 
-    st.subheader("Input Features")
-    st.dataframe(input_df)
+    st.subheader("📊 Forecast Plot")
+    st.pyplot(fig)  # Display matplotlib figure
 
-    if st.button("🔮 Predict Exchange Rate"):
-        prediction = predict_next_exchange_rate(input_df)
-        st.success(f"Predicted Next Exchange Rate: ₦{prediction:,.2f}")
+    st.markdown("---")
+    st.subheader("📉 Evaluation Metrics")
+    st.dataframe(metrics_df.style.format(precision=4), use_container_width=True)
+
+    st.markdown("---")
+    st.subheader("🗓️ Next Week Forecast")
+    st.metric(label="Forecasted Exchange Rate", value=f"{y_next:.4f}")
+
+    st.markdown("---")
+    with st.expander("📂 Last Actual vs Predicted Rate"):
+        st.dataframe(last_df.style.format(precision=4), use_container_width=True)
+
+    st.success("✅ Forecast completed.")
