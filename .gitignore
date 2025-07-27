@@ -7,3 +7,5 @@ data/
 .DS_Store
 *.egg-info/
 notebooks/explore.ipynb
+exchange_rate_model/module.py
+notebooks/model.ipynb
